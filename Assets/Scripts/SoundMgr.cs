@@ -31,7 +31,19 @@ public class SoundMgr : SingletonMono<SoundMgr>
 
         DeliveryMgr.GetInstance().OnRecipeSuccess += DeliveryMgr_OnRecipeSuccess;
         CuttingCounter.OnAnyCut += CuttingCounter_OnAnyCut;
-        Player.GetInstance().OnPickedSth += Player_OnPickedSth;
+
+
+        if (GameModeMgr.GetInstance().GetGameMode() == GameModeMgr.GameMode.Casual)
+        {
+            Player.GetInstance().OnPickedSth += Player_OnPickedSth;
+        }
+        else
+        {
+            EventCenter.GetInstance().AddEventListener("PlayerCreated", () => {
+                Player.GetInstance().OnPickedSth += Player_OnPickedSth;
+            });
+        }
+       
         BaseCounter.OnAnyObjectPlaceHere += BaseCounter_OnAnyObjectPlaceHere;
         TrashCounter.OnAnyObjectTrashed += TrashCounter_OnAnyObjectTrashed;
         //EventCenter.GetInstance().AddEventListener<Object>("TrashCounter_OnAnyObjectTrashed", TrashCounter_OnAnyObjectTrashed);

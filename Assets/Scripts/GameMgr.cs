@@ -9,6 +9,9 @@ public class GameMgr : SingletonMono<GameMgr>
     public event EventHandler OnStateChanged;
     public event EventHandler OnGamePaused;
     public event EventHandler OnGameUnpaused;
+
+   
+
     private enum State
     {
         WaitingToStart,
@@ -16,6 +19,7 @@ public class GameMgr : SingletonMono<GameMgr>
         GamePlaying,
         GameOver,
     }
+    
 
     private State state;
     
@@ -110,6 +114,8 @@ public class GameMgr : SingletonMono<GameMgr>
     {
         return 1 - (gamePlayingTimer / gamePlayingTimeMax);
     }
+
+    
 
     public void PauseGame()
     {

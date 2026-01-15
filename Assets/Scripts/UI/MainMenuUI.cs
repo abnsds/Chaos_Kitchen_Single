@@ -8,12 +8,13 @@ public class MainMenuUI : MonoBehaviour
 {
     [SerializeField] private Button playBtn;
     [SerializeField] private Button quitBtn;
-
+    [SerializeField] private GameObject SelectModeUI;
     private void Awake()
     {
         playBtn.onClick.AddListener(() =>
         {
-            ScenesMgr.GetInstance().LoadSceneWithLoadingScene("GameScene", ()=> { });
+            SelectModeUI.SetActive(true);
+            Hide();
         });
 
         quitBtn.onClick.AddListener(() =>
@@ -25,4 +26,11 @@ public class MainMenuUI : MonoBehaviour
     }
 
    
+
+    private void Hide()
+    {
+        gameObject.SetActive(false);
+    }
+
+
 }

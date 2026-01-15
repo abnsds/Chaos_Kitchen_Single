@@ -277,7 +277,7 @@ public class RectangleMapGenerator : SingletonMono<RectangleMapGenerator>
         
         playerInstance = Instantiate(playerPrefab, playerSpawnPosition, Quaternion.identity, transform);
         playerInstance.name = "Player";
-
+        EventCenter.GetInstance().MarkEventReady("PlayerCreated");
         EventCenter.GetInstance().EventTrigger(camera, playerInstance.transform);
 
         //Debug.Log($"玩家生成在位置: {playerSpawnPosition}");

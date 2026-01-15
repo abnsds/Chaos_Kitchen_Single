@@ -30,12 +30,12 @@ public class MainCameraPlayerFollow : SingletonMono<MainCameraPlayerFollow>
         // 3. 初始化固定位置
         _fixedCameraPos = transform.position;
 
-        // 4. 【核心】监听生成器的camera事件（对应RectangleMapGenerator的camera常量）
+        // 4. 监听生成器的camera事件（对应RectangleMapGenerator的camera常量）
         EventCenter.GetInstance().AddEventListener<Transform>("camera", OnPlayerSpawned);
         //Debug.Log("摄像机已监听camera事件，等待玩家生成...");
     }
 
-    // 【核心】事件回调：收到玩家数据后绑定
+    // 事件回调：收到玩家数据后绑定
     private void OnPlayerSpawned(Transform playerTransform)
     {
         if (playerTransform == null)
