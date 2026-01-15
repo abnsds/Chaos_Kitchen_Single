@@ -13,7 +13,7 @@ public class MainMenuUI : MonoBehaviour
     {
         playBtn.onClick.AddListener(() =>
         {
-            ScenesMgr.GetInstance().LoadScene("GameScene", () =>{ });
+            ScenesMgr.GetInstance().LoadSceneWithLoadingScene("GameScene", ()=> { });
         });
 
         quitBtn.onClick.AddListener(() =>
