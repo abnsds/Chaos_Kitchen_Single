@@ -25,7 +25,7 @@ public class GameMgr : SingletonMono<GameMgr>
     
     private float countdownToStartTimer = 3f;
     private float gamePlayingTimer;
-    private float gamePlayingTimeMax = 6f;
+    private float gamePlayingTimeMax = 60f;
 
     private bool isGamePaused = false;
 
