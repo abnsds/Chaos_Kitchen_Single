@@ -8,6 +8,8 @@ public class MainMenuUI : MonoBehaviour
 {
     [SerializeField] private Button playBtn;
     [SerializeField] private Button quitBtn;
+    [SerializeField] private Button rankBtn;
+
     [SerializeField] private GameObject SelectModeUI;
     private void Awake()
     {
@@ -20,6 +22,10 @@ public class MainMenuUI : MonoBehaviour
         quitBtn.onClick.AddListener(() =>
         {
             Application.Quit();
+        });
+        rankBtn.onClick.AddListener(() =>
+        {
+            RankUI.Instance.Show();
         });
 
         Time.timeScale = 1.0f;

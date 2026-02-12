@@ -16,3 +16,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: f82a603502e2df149bb38dbb4d657c35, type: 2}
   - {fileID: 11400000, guid: add911ea25af94645a0df5ee0c07101f, type: 2}
   recipeName: Salad
+  score: 20

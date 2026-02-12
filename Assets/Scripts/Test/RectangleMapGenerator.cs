@@ -1,4 +1,4 @@
-﻿// RectangleMapGenerator.cs
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -32,9 +32,19 @@ public class RectangleMapGenerator : SingletonMono<RectangleMapGenerator>
     [Header("调试显示")]
     public bool showDebug = true; // 显示调试信息
 
+    
+    [Header("通关分数配置")]
+    public int scorePerBlock = 2; // 每个方块对应的基础分数
+    public float randomFactorMin = 0.8f; // 随机因子最小值（0.8=80%）
+    public float randomFactorMax = 1.2f; // 随机因子最大值（1.2=120%）
+    public int scoreBaseOffset = 10; // 基准校正值（固定加分，平衡难度）
+    public event EventHandler<int> OnTargetScoreGenerated;
+
+    private int currentTargetScore; // 当前关卡的目标分数
+
     new private const string camera = "camera";
 
-    // 私有变量
+    
     private List<Vector2Int> wallPositions = new List<Vector2Int>();
     private List<Vector2Int> rectangleCorners = new List<Vector2Int>();
     private GameObject playerInstance;
@@ -44,6 +54,8 @@ public class RectangleMapGenerator : SingletonMono<RectangleMapGenerator>
     private int currentBlockIndex = 0; // 当前使用的方块索引
     private RectangleInfo rectangleInfo; // 矩形信息
     private Dictionary<Vector2Int, bool> cornerPositions = new Dictionary<Vector2Int, bool>(); // 记录顶点位置
+
+
 
     // 矩形信息结构
     private struct RectangleInfo
@@ -100,6 +112,33 @@ public class RectangleMapGenerator : SingletonMono<RectangleMapGenerator>
 
         //Debug.Log($"矩形关卡生成完成！尺寸: {rectangleInfo.width}x{rectangleInfo.height}, 位置: {rectangleInfo.position}");
         //Debug.Log($"玩家位置: {playerSpawnPosition}");
+        CalculateTargetScore();
+        // 通知外部（UI/DeliveryMgr）目标分数已更新
+        OnTargetScoreGenerated?.Invoke(this, currentTargetScore);
+        Debug.Log($"当前关卡总方块数：{GetTotalBlocks()}，目标分数：{currentTargetScore}");
+    }
+    /// <summary>
+    /// 根据总方块数计算动态目标分数
+    /// 公式：目标分数 = (总方块数 × 每方块基础分 + 基准校正值) × 随机因子
+    /// </summary>
+    private void CalculateTargetScore()
+    {
+        int totalBlocks = GetTotalBlocks();
+        if (totalBlocks <= 0)
+        {
+            currentTargetScore = scoreBaseOffset;
+            return;
+        }
+        int lastLevelScore = GameMgr.GetInstance().GetLastLevelScore();
+        
+        int baseScore = (totalBlocks * scorePerBlock) + scoreBaseOffset;
+        // 生成随机增量（10~30分，可调整）
+        int randomIncrement = UnityEngine.Random.Range(10, 31);
+        // 最终目标分数 = 上一关分数 + 本关基础分 × 随机因子 + 随机增量
+        float randomFactor = UnityEngine.Random.Range(randomFactorMin, randomFactorMax);
+        currentTargetScore = Mathf.RoundToInt(lastLevelScore + (baseScore * randomFactor) + randomIncrement);
+        Debug.Log($"第{GameMgr.GetInstance().GetCurrentLevel()}关目标分数计算完成：");
+        Debug.Log($"上一关分数：{lastLevelScore}，本关基础分：{baseScore}，随机增量：{randomIncrement}，最终目标：{currentTargetScore}");
     }
 
     #region 矩形生成部分
@@ -109,8 +148,8 @@ public class RectangleMapGenerator : SingletonMono<RectangleMapGenerator>
     void GenerateRandomRectangle()
     {
         // 随机确定矩形尺寸
-        int width = Random.Range(minWidth, maxWidth + 1);
-        int height = Random.Range(minHeight, maxHeight + 1);
+        int width = UnityEngine.Random.Range(minWidth, maxWidth + 1);
+        int height = UnityEngine.Random.Range(minHeight, maxHeight + 1);
 
         // 确保矩形不会超出地图边界
         int maxX = gridSize.x - width - 1;
@@ -126,8 +165,8 @@ public class RectangleMapGenerator : SingletonMono<RectangleMapGenerator>
         }
 
         // 随机确定矩形左下角位置
-        int x = Random.Range(1, maxX);
-        int y = Random.Range(1, maxY);
+        int x = UnityEngine.Random.Range(1, maxX);
+        int y = UnityEngine.Random.Range(1, maxY);
 
         rectangleInfo = new RectangleInfo
         {
@@ -319,7 +358,7 @@ public class RectangleMapGenerator : SingletonMono<RectangleMapGenerator>
         if (shuffledBlockIndices.Count == 0)
         {
             Debug.LogWarning("方块索引不足，返回随机索引");
-            return Random.Range(0, allBlockPrefabs.Length);
+            return UnityEngine.Random.Range(0, allBlockPrefabs.Length);
         }
 
         // 如果已经用完所有独特方块，重新打乱并重新开始
@@ -341,7 +380,7 @@ public class RectangleMapGenerator : SingletonMono<RectangleMapGenerator>
     {
         for (int i = 0; i < list.Count; i++)
         {
-            int randomIndex = Random.Range(i, list.Count);
+            int randomIndex = UnityEngine.Random.Range(i, list.Count);
             T temp = list[i];
             list[i] = list[randomIndex];
             list[randomIndex] = temp;
@@ -536,7 +575,7 @@ public class RectangleMapGenerator : SingletonMono<RectangleMapGenerator>
         }
 
         // 随机确定额外不可交互方块数量
-        int nonInteractiveCount = Random.Range(minNonInteractiveBlocks, maxNonInteractiveBlocks + 1);
+        int nonInteractiveCount = UnityEngine.Random.Range(minNonInteractiveBlocks, maxNonInteractiveBlocks + 1);
 
         // 确保至少包含四个顶点
         nonInteractiveCount = Mathf.Max(nonInteractiveCount, 4);
@@ -553,7 +592,7 @@ public class RectangleMapGenerator : SingletonMono<RectangleMapGenerator>
         // 添加额外的不可交互方块位置（避开已经添加的顶点）
         while (nonInteractiveIndices.Count < nonInteractiveCount)
         {
-            int randomIndex = Random.Range(0, wallPositions.Count);
+            int randomIndex = UnityEngine.Random.Range(0, wallPositions.Count);
 
             // 确保不是已经包含的顶点位置
             if (!nonInteractiveIndices.Contains(randomIndex))
@@ -915,6 +954,15 @@ public class RectangleMapGenerator : SingletonMono<RectangleMapGenerator>
     public void ClearMap()
     {
         ClearExistingSystem();
+    }
+
+    
+    /// <summary>
+    /// 获取当前关卡的目标分数
+    /// </summary>
+    public int GetCurrentTargetScore()
+    {
+        return currentTargetScore;
     }
     #endregion
 }
